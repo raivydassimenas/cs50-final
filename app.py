@@ -1,12 +1,16 @@
 from flask import Flask, render_template, session, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin
-from werkzeug.security import check_password_hash, generate_password_hash
+from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import InputRequired, Length, ValidationError
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///predictions.db'
 app.config["SECRET_KEY"] = 'mysecretkey'
 db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
 
 
 class User(db.Model, UserMixin):
@@ -15,94 +19,75 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(20), nullable=False)
     name = db.Column(db.String(20), nullable=False)
 
-# # Ensure the API_KEY is set
-# if not os.environ.get("API_KEY"):
-#     raise RuntimeError("API_KEY not set")
+
+class RegisterForm(FlaskForm):
+    name = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw=["placeholder", "Name"])
+    email = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw=["placeholder", "Email"])
+    password = PasswordField(validators=[InputRequired(), Length(min=4, max=20)], render_kw=["placeholder", "Password"])
+    submit = SubmitField("Register")
+
+    def validate_email(self, email):
+        existing_user_email = db.session.execute(db.select(User).filter_by(email=email.data)).one()
+        if existing_user_email:
+            raise ValidationError("That email already exists")
 
 
-# with app.app_context():
-#     db.create_all()
-#     db.session.commit()
+class LoginForm(FlaskForm):
+    email = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw=["placeholder", "Email"])
+    password = PasswordField(validators=[InputRequired(), Length(min=4, max=20)], render_kw=["placeholder", "Password"])
+    submit = SubmitField("Register")
 
-def apology(message, status):
-    return render_template("/login.html", message=message)
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.execute(db.select(User).filter_by(id=user_id)).one()
 
 
 @app.route('/')
+@login_required
 def index():
-    return render_template("/login.html")
+    return render_template("/index.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """Log user in"""
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = db.session.execute(db.select(User).filter_by(email=form.email.data)).one()
+        if user:
+            if bcrypt.check_password_hash(user.password, form.password.data):
+                login_user(user)
+                return redirect(url_for("index"))
 
-    session.clear()
-
-    if request.method == "POST":
-        if not request.form.get("email"):
-            return apology("Please supply your email")
-        elif not request.form.get("password"):
-            return apology("Please supply your password")
-
-        user = db.session.execute(db.select(User).filter_by(email=request.form.get("email")))
-
-        if user is None:
-            return apology("The user does not exist", 403)
-
-        if generate_password_hash(request.form.get("password")) != user[0]["password"]:
-            return apology("Invalid password", 403)
-
-        session["user_id"] = user["id"]
-
-        return redirect("/")
-
-    else:
-        return render_template("/login.html")
-
-
-@app.route("/logout")
-def logout():
-    session.clear()
-
-    return redirect("/login")
+    return render_template("/login.html", form=form)
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    session.clear()
+    form = RegisterForm()
 
-    if request.method == "GET":
-        return render_template("/register.html")
-
-    if request.method == "POST":
-        if not request.form.get("name"):
-            return apology("Must provide a name", 403)
-
-        elif not request.form.get("email"):
-            return apology("Must provide an email", 403)
-
-        elif not request.form.get("password"):
-            return apology("Must provide a poassword", 403)
-
-        elif not request.form.get("password2"):
-            return apology("Must confirm the password", 403)
-
-        elif request.form.get("password") != request.form.get("password2"):
-            return apology("Passwords do not match", 403)
-
-        user = db.session.execute(db.select(User).filter_by(email=request.form.get("email")))
-
-        if user is not None:
-            return apology("Email already taken", 403)
-
-        user = User(name=request.form.get("name"), email=request.form.get("email"),
-                    password=generate_password_hash(request.form.get("password")))
-        db.session.add(user)
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data)
+        new_user = User(name=form.name.data, email=form.email.data, password=hashed_password)
+        db.session.add(new_user)
         db.session.commit()
-        session["user_id"] = user["id"]
 
-        return redirect('/')
+        return redirect(url_for("/"))
+
+    return render_template("/register.html", form=form)
+
+
+@app.route("/logout", methods=["GET", "POST"])
+@login_required
+def logout():
+    logout_user()
+
+    return redirect(url_for("login"))
 
 
 if __name__ == '__main__':

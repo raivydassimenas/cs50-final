@@ -19,14 +19,14 @@
         <div id="navbar">
             {% if session["user_id"] %}
                 <ul class="grid grid-cols-3">
-                    <li class="mx-4"><a class="nav-link" href="{{ url_for('/predictions') }}">My predictions</a></li>
-                    <li class="mx-4"><a class="nav-link" href="{{ url_for('/rankings') }}">Rankings</a></li>
-                    <li class="mx-4"><a class="nav-link" href="{{ url_for('/logout') }}">Log out</a></li>
+                    <li class="mx-4"><a class="nav-link" href="{{ url_for('predictions') }}">My predictions</a></li>
+                    <li class="mx-4"><a class="nav-link" href="{{ url_for('rankings') }}">Rankings</a></li>
+                    <li class="mx-4"><a class="nav-link" href="{{ url_for('logout') }}">Log out</a></li>
                 </ul>
             {% else %}
                 <ul class="grid grid-cols-2">
-                    <li class="mx-4"><a class="nav-link" href="{{ url_for('/register') }}">Register</a></li>
-                    <li class="mx-4"><a class="nav-link" href="{{ url_for('/login') }}">Log in</a></li>
+                    <li class="mx-4"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
+                    <li class="mx-4"><a class="nav-link" href="{{ url_for('login') }}">Log in</a></li>
                 </ul>
             {% endif %}
         </div>
