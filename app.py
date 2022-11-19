@@ -1,6 +1,6 @@
 from flask import Flask, render_template, session, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
+from flask_login import login_user, LoginManager, login_required, logout_user, current_user
 from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
@@ -70,10 +70,10 @@ def login():
             return apology("User does not exist", 403)
 
         hashed_password = bcrypt.generate_password_hash(password)
-        if hashed_password != user["password"]:
+        if hashed_password != user["User"].password:
             return apology("Wrong email/password combination", 403)
 
-        user.authenticated = True
+        user[0].authenticated = True
 
         login_user(user)
         return redirect(url_for("index"))

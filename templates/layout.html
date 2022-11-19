@@ -10,14 +10,14 @@
 </head>
 
 <body>
-<div clas="container font-sans grid-rows-3 h-screen">
+<div class="container font-sans grid-rows-3 w-full mx-auto">
     <nav class="flex justify-between items-center bg-slate-500 text-white text-lg">
         <div class="grid grid-cols-2 items-center">
             <img class="m-4" src="/static/icons8-basketball-50.png">
             <div class="m-4" id="logo-title">NBA Predictions</div>
         </div>
         <div id="navbar">
-            {% if session["user_id"] %}
+            {% if current_user.is_authenticated %}
                 <ul class="grid grid-cols-3">
                     <li class="mx-4 border-solid border-4 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('predictions') }}">My predictions</a></li>
                     <li class="mx-4 border-solid border-4 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('rankings') }}">Rankings</a></li>
@@ -37,7 +37,7 @@
     </main>
 
     <footer class="text-end p-2 text-white bg-slate-500">
-        Copyright <a target="_blank" href="http://web.vu.lt/mif/r.simenas" class="text-black">Raivydas Šimėnas</a>,
+        Copyright by <a target="_blank" href="http://web.vu.lt/mif/r.simenas" class="text-black">Raivydas Šimėnas</a>,
         <a target="_blank" href="https://icons8.com/icon/9817/basketball" class="text-black">Basketball</a> icon by <a target="_blank" href="https://icons8.com" class="text-black">Icons8</a>
     </footer>
 </div>
