@@ -19,14 +19,14 @@
         <div id="navbar">
             {% if session["user_id"] %}
                 <ul class="grid grid-cols-3">
-                    <li class="mx-4"><a class="nav-link" href="{{ url_for('predictions') }}">My predictions</a></li>
-                    <li class="mx-4"><a class="nav-link" href="{{ url_for('rankings') }}">Rankings</a></li>
-                    <li class="mx-4"><a class="nav-link" href="{{ url_for('logout') }}">Log out</a></li>
+                    <li class="mx-4 border-solid border-4 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('predictions') }}">My predictions</a></li>
+                    <li class="mx-4 border-solid border-4 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('rankings') }}">Rankings</a></li>
+                    <li class="mx-4 border-solid border-4 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('logout') }}">Log out</a></li>
                 </ul>
             {% else %}
                 <ul class="grid grid-cols-2">
-                    <li class="mx-4"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
-                    <li class="mx-4"><a class="nav-link" href="{{ url_for('login') }}">Log in</a></li>
+                    <li class="mx-4 border-solid border-4 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('register') }}">Register</a></li>
+                    <li class="mx-4 border-solid border-4 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('login') }}">Log in</a></li>
                 </ul>
             {% endif %}
         </div>
@@ -37,8 +37,8 @@
     </main>
 
     <footer class="text-end p-2 text-white bg-slate-500">
-        Copyright <a href="http://web.vu.lt/mif/r.simenas">Raivydas Šimėnas</a>,
-        <a target="_blank" href="https://icons8.com/icon/9817/basketball">Basketball</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+        Copyright <a target="_blank" href="http://web.vu.lt/mif/r.simenas" class="text-black">Raivydas Šimėnas</a>,
+        <a target="_blank" href="https://icons8.com/icon/9817/basketball" class="text-black">Basketball</a> icon by <a target="_blank" href="https://icons8.com" class="text-black">Icons8</a>
     </footer>
 </div>
 </body>
