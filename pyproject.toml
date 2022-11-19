@@ -10,6 +10,7 @@ packages = [{include = "cs50_final"}]
 python = "^3.10"
 flask-sqlalchemy = "^3.0.2"
 flask-login = "^0.6.2"
+flask-bcrypt = "^1.0.1"
 
 
 [build-system]
