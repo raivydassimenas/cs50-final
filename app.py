@@ -1,7 +1,8 @@
 from flask import Flask, render_template, session, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import login_user, LoginManager, login_required, logout_user, current_user
+from flask_login import login_user, LoginManager, login_required, logout_user, current_user, UserMixin
 from flask_bcrypt import Bcrypt
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///predictions.db'
@@ -13,19 +14,24 @@ bcrypt = Bcrypt(app)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(20), unique=True, nullable=False)
-    password = db.Column(db.String(20), nullable=False)
+    password = db.Column(db.String(80), nullable=False)
     name = db.Column(db.String(20), nullable=False)
     authenticated = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)
+    # is_anonymous = db.Column(db.Boolean, default=False)
 
+    @property
     def is_authenticated(self):
         return self.authenticated
 
+    @property
     def is_active(self):
         return True
 
     def get_id(self):
         return self.email
 
+    @property
     def is_anonymous(self):
         return True
 
@@ -44,8 +50,8 @@ def load_user(user_id):
     return db.session.execute(db.select(User).filter_by(id=user_id)).first()
 
 
-def apology(message, status):
-    return render_template("/apology.html", message=message)
+def apology(message, status, password1=None, password2=None):
+    return render_template("/apology.html", message=message, password1=password1, password2=password2)
 
 
 @app.route('/')
@@ -69,11 +75,9 @@ def login():
         if not user:
             return apology("User does not exist", 403)
 
-        hashed_password = bcrypt.generate_password_hash(password)
-        if hashed_password != user["User"].password:
-            return apology("Wrong email/password combination", 403)
+        if not bcrypt.check_password_hash(user[0].password, password):
+            return apology("Wrong email/password combination", 403, user[0].password, password)
 
-        user[0].authenticated = True
 
         login_user(user)
         return redirect(url_for("index"))
@@ -108,12 +112,11 @@ def register():
         if user:
             return apology("User already exists", 403)
 
-        hashed_password = bcrypt.generate_password_hash(password)
+        hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
         user = User(name=name, email=email, password=hashed_password)
         db.session.add(user)
         db.session.commit()
 
-        user.authenticated = True
         login_user(user)
 
         return redirect(url_for("index"))

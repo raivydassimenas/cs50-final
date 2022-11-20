@@ -19,14 +19,14 @@
         <div id="navbar">
             {% if current_user.is_authenticated %}
                 <ul class="grid grid-cols-3">
-                    <li class="mx-4 border-solid border-4 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('predictions') }}">My predictions</a></li>
-                    <li class="mx-4 border-solid border-4 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('rankings') }}">Rankings</a></li>
-                    <li class="mx-4 border-solid border-4 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('logout') }}">Log out</a></li>
+                    <li class="mx-4 border-solid border-2 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('predictions') }}">My predictions</a></li>
+                    <li class="mx-4 border-solid border-2 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('rankings') }}">Rankings</a></li>
+                    <li class="mx-4 border-solid border-2 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('logout') }}">Log out</a></li>
                 </ul>
             {% else %}
                 <ul class="grid grid-cols-2">
-                    <li class="mx-4 border-solid border-4 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('register') }}">Register</a></li>
-                    <li class="mx-4 border-solid border-4 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('login') }}">Log in</a></li>
+                    <li class="mx-4 border-solid border-2 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('register') }}">Register</a></li>
+                    <li class="mx-4 border-solid border-2 rounded-full border-black p-2 text-center bg-slate-700"><a  href="{{ url_for('login') }}">Log in</a></li>
                 </ul>
             {% endif %}
         </div>
