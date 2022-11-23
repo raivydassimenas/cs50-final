@@ -18,25 +18,6 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(20), unique=True, nullable=False)
     password = db.Column(db.String(80), nullable=False)
     name = db.Column(db.String(20), nullable=False)
-    # authenticated = db.Column(db.Boolean, default=False)
-    # is_active = db.Column(db.Boolean, default=True)
-
-    # is_anonymous = db.Column(db.Boolean, default=False)
-
-    # @property
-    # def is_authenticated(self):
-    #     return self.authenticated
-    #
-    # @property
-    # def is_active(self):
-    #     return True
-    #
-    # def get_id(self):
-    #     return self.email
-    #
-    # @property
-    # def is_anonymous(self):
-    #     return True
 
 
 with app.app_context():
@@ -54,7 +35,8 @@ class RegisterForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()], render_kw={"placeholder": "Name"})
     email = StringField("Email", validators=[DataRequired(), Email()], render_kw={"placeholder": "Email"})
     password = PasswordField("Password", validators=[DataRequired()], render_kw={"placeholder": "Password"})
-    password2 = PasswordField("Confirm password", validators=[DataRequired()], render_kw={"placeholder": "Confirm password"})
+    password2 = PasswordField("Confirm password", validators=[DataRequired()],
+                              render_kw={"placeholder": "Confirm password"})
     submit = SubmitField("Register")
 
 
@@ -81,36 +63,21 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
-    if request.method == "POST":
-        # email = request.form.get("email")
-        # password = request.form.get("password")
-        # if not email:
-        #     return apology("Must provide email", 403)
-        #
-        # if not password:
-        #     return apology("Must provide password", 403)
-        #
-        # user = db.session.execute(db.select(User).filter_by(email=email)).first()
-        # if not user:
-        #     return apology("User does not exist", 403)
-        #
-        # if not bcrypt.check_password_hash(user[0].password, password):
-        #     return apology("Wrong email/password combination", 403, user[0].password, password)
+    if request.method == "POST" and form.validate_on_submit():
 
-        if form.validate_on_submit():
-            email = form.email.data
-            password = form.password.data
+        email = form.email.data
+        password = form.password.data
 
-            user = db.session.execute(db.select(User).filter_by(email=email)).first()
+        user = db.session.execute(db.select(User).filter_by(email=email)).first()
 
-            if not user:
-                return apology("User does not exist", 403)
-            user = user[0]
-            if not bcrypt.check_password_hash(user.password, password):
-                return apology("Wrong email/password combination", 403)
+        if not user:
+            return apology("User does not exist", 403)
+        user = user[0]
+        if not bcrypt.check_password_hash(user.password, password):
+            return apology("Wrong email/password combination", 403)
 
-            login_user(user)
-            return redirect(url_for("index"))
+        login_user(user)
+        return redirect(url_for("index"))
 
     return render_template("/login.html", form=form)
 
@@ -126,25 +93,12 @@ def register():
             password = form.password.data
             password2 = form.password2.data
 
-            # if not name:
-            #     return apology("Must provide name", 403)
-            #
-            # if not email:
-            #     return apology("Must provide email", 403)
-            #
-            # if not password:
-            #     return apology("Must provide password", 403)
-            #
-            # if not password2:
-            #     return apology("Must confirm password", 403)
-
             if password != password2:
                 return apology("Passwords do not match", 403)
 
             user = db.session.execute(db.select(User).filter_by(email=email)).first()
             if user:
                 return apology("User already exists", 403)
-            user = user[0]
 
             hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
             user = User(name=name, email=email, password=hashed_password)
