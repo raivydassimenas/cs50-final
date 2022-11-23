@@ -45,17 +45,17 @@ with app.app_context():
 
 
 class LoginForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()])
-    password = PasswordField("Password", validators=[DataRequired()])
-    submit = SubmitField("Submit")
+    email = StringField("Email", validators=[DataRequired(), Email()], render_kw={"placeholder": "Email"})
+    password = PasswordField("Password", validators=[DataRequired()], render_kw={"placeholder": "Password"})
+    submit = SubmitField("Login")
 
 
 class RegisterForm(FlaskForm):
-    name = StringField("Name", validators=[DataRequired()])
-    email = StringField("Email", validators=[DataRequired(), Email()])
-    password = StringField("Password", validators=[DataRequired()])
-    password2 = StringField("Confirm password", validators=[DataRequired()])
-    submit = SubmitField("Submit")
+    name = StringField("Name", validators=[DataRequired()], render_kw={"placeholder": "Name"})
+    email = StringField("Email", validators=[DataRequired(), Email()], render_kw={"placeholder": "Email"})
+    password = PasswordField("Password", validators=[DataRequired()], render_kw={"placeholder": "Password"})
+    password2 = PasswordField("Confirm password", validators=[DataRequired()], render_kw={"placeholder": "Confirm password"})
+    submit = SubmitField("Register")
 
 
 login_manager = LoginManager()
