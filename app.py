@@ -65,7 +65,7 @@ login_manager.login_view = "login"
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.execute(db.select(User).filter_by(id=user_id)).first()
+    return db.session.execute(db.select(User).filter_by(id=user_id)).first()[0]
 
 
 def apology(message, status, password1=None, password2=None):
@@ -105,7 +105,8 @@ def login():
 
             if not user:
                 return apology("User does not exist", 403)
-            if not bcrypt.check_password_hash(user[0].password, password):
+            user = user[0]
+            if not bcrypt.check_password_hash(user.password, password):
                 return apology("Wrong email/password combination", 403)
 
             login_user(user)
@@ -143,6 +144,7 @@ def register():
             user = db.session.execute(db.select(User).filter_by(email=email)).first()
             if user:
                 return apology("User already exists", 403)
+            user = user[0]
 
             hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
             user = User(name=name, email=email, password=hashed_password)
