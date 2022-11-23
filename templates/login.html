@@ -1,10 +1,16 @@
 {% extends "layout.html" %}
 
 {% block main %}
-    <form method="post" action="/login" class="w-96 m-8 p-8 mx-auto gap-4 flex flex-col border-solid border-2 border-slate-500 rounded">
-        <input type="email" class="border-solid border-2 border-slate-500 mx-auto w-full p-1 rounded" id="email" name="email" placeholder="Email" required/>
-        <input type="password" class="border-solid border-2 border-slate-500 mx-auto w-full p-1 rounded" id="password" name="password" placeholder="Password" required/>
-        <button type="submit" class="border-solid border-2 border-black mx-auto w-1/2 bg-slate-700 text-white p-1 rounded-full text-center">Login</button>
-        <p class="text-center">Not registered? <a href="{{ url_for('register') }}" class="text-blue-500">Click here</a></p>
+    <form method="post" action="/login"
+          class="w-96 m-8 p-8 mx-auto gap-4 flex flex-col border-solid border-2 border-slate-500 rounded">
+        {#        <input type="email" class="border-solid border-2 border-slate-500 mx-auto w-full p-1 rounded" id="email" name="email" placeholder="Email" required/>#}
+        {#        <input type="password" class="border-solid border-2 border-slate-500 mx-auto w-full p-1 rounded" id="password" name="password" placeholder="Password" required/>#}
+        {#        <button type="submit" class="border-solid border-2 border-black mx-auto w-1/2 bg-slate-700 text-white p-1 rounded-full text-center">Login</button>#}
+        {{ form.hidden_tag() }}
+        {{ form.email(class="border-solid border-2 border-slate-500 mx-auto w-full p-1 rounded") }}
+        {{ form.password(class="border-solid border-2 border-slate-500 mx-auto w-full p-1 rounded") }}
+        {{ form.submit(class="border-solid border-2 border-black mx-auto w-1/2 bg-slate-700 text-white p-1 rounded-full text-center") }}
     </form>
+    <p class="text-center">Not registered? <a href="{{ url_for('register') }}" class="text-blue-500">Click here</a></p>
+
 {% endblock %}

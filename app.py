@@ -2,7 +2,9 @@ from flask import Flask, render_template, session, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_user, LoginManager, login_required, logout_user, current_user, UserMixin
 from flask_bcrypt import Bcrypt
-from werkzeug.security import check_password_hash, generate_password_hash
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField, PasswordField
+from wtforms.validators import DataRequired, Email
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///predictions.db'
@@ -11,34 +13,50 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(20), unique=True, nullable=False)
     password = db.Column(db.String(80), nullable=False)
     name = db.Column(db.String(20), nullable=False)
-    authenticated = db.Column(db.Boolean, default=False)
-    is_active = db.Column(db.Boolean, default=True)
+    # authenticated = db.Column(db.Boolean, default=False)
+    # is_active = db.Column(db.Boolean, default=True)
+
     # is_anonymous = db.Column(db.Boolean, default=False)
 
-    @property
-    def is_authenticated(self):
-        return self.authenticated
-
-    @property
-    def is_active(self):
-        return True
-
-    def get_id(self):
-        return self.email
-
-    @property
-    def is_anonymous(self):
-        return True
+    # @property
+    # def is_authenticated(self):
+    #     return self.authenticated
+    #
+    # @property
+    # def is_active(self):
+    #     return True
+    #
+    # def get_id(self):
+    #     return self.email
+    #
+    # @property
+    # def is_anonymous(self):
+    #     return True
 
 
 with app.app_context():
     db.create_all()
     db.session.commit()
+
+
+class LoginForm(FlaskForm):
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
+
+class RegisterForm(FlaskForm):
+    name = StringField("Name", validators=[DataRequired()])
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    password = StringField("Password", validators=[DataRequired()])
+    password2 = StringField("Confirm password", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -62,66 +80,80 @@ def index():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    form = LoginForm()
     if request.method == "POST":
-        email = request.form.get("email")
-        password = request.form.get("password")
-        if not email:
-            return apology("Must provide email", 403)
+        # email = request.form.get("email")
+        # password = request.form.get("password")
+        # if not email:
+        #     return apology("Must provide email", 403)
+        #
+        # if not password:
+        #     return apology("Must provide password", 403)
+        #
+        # user = db.session.execute(db.select(User).filter_by(email=email)).first()
+        # if not user:
+        #     return apology("User does not exist", 403)
+        #
+        # if not bcrypt.check_password_hash(user[0].password, password):
+        #     return apology("Wrong email/password combination", 403, user[0].password, password)
 
-        if not password:
-            return apology("Must provide password", 403)
+        if form.validate_on_submit():
+            email = form.email.data
+            password = form.password.data
 
-        user = db.session.execute(db.select(User).filter_by(email=email)).first()
-        if not user:
-            return apology("User does not exist", 403)
+            user = db.session.execute(db.select(User).filter_by(email=email)).first()
 
-        if not bcrypt.check_password_hash(user[0].password, password):
-            return apology("Wrong email/password combination", 403, user[0].password, password)
+            if not user:
+                return apology("User does not exist", 403)
+            if not bcrypt.check_password_hash(user[0].password, password):
+                return apology("Wrong email/password combination", 403)
 
+            login_user(user)
+            return redirect(url_for("index"))
 
-        login_user(user)
-        return redirect(url_for("index"))
-
-    return render_template("/login.html")
+    return render_template("/login.html", form=form)
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    form = RegisterForm()
+
     if request.method == "POST":
-        name = request.form.get("name")
-        email = request.form.get("email")
-        password = request.form.get("password")
-        password2 = request.form.get("password2")
+        if form.validate_on_submit():
+            name = form.name.data
+            email = form.email.data
+            password = form.password.data
+            password2 = form.password2.data
 
-        if not name:
-            return apology("Must provide name", 403)
+            # if not name:
+            #     return apology("Must provide name", 403)
+            #
+            # if not email:
+            #     return apology("Must provide email", 403)
+            #
+            # if not password:
+            #     return apology("Must provide password", 403)
+            #
+            # if not password2:
+            #     return apology("Must confirm password", 403)
 
-        if not email:
-            return apology("Must provide email", 403)
+            if password != password2:
+                return apology("Passwords do not match", 403)
 
-        if not password:
-            return apology("Must provide password", 403)
+            user = db.session.execute(db.select(User).filter_by(email=email)).first()
+            if user:
+                return apology("User already exists", 403)
 
-        if not password2:
-            return apology("Must confirm password", 403)
+            hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
+            user = User(name=name, email=email, password=hashed_password)
+            db.session.add(user)
+            db.session.commit()
 
-        if password != password2:
-            return apology("Passwords do not match", 403)
+            login_user(user)
 
-        user = db.session.execute(db.select(User).filter_by(email=email)).first()
-        if user:
-            return apology("User already exists", 403)
+            return redirect(url_for("index"))
 
-        hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
-        user = User(name=name, email=email, password=hashed_password)
-        db.session.add(user)
-        db.session.commit()
-
-        login_user(user)
-
-        return redirect(url_for("index"))
-
-    return render_template("/register.html")
+    return render_template("/register.html", form=form)
 
 
 @app.route("/logout", methods=["GET", "POST"])

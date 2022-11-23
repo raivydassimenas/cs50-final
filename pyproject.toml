@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "cs50-final"
+version = "0.1.0"
+description = "CS50 final project implementing NBA score prediction game"
+authors = ["Raivydas Šimėnas <raivydas.simenas@gmail.com>"]
+readme = "README.md"
+packages = [{include = "cs50_final"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+flask-wtf = "^1.0.1"
+flask-sqlalchemy = "^3.0.2"
+flask-login = "^0.6.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
