@@ -18,6 +18,24 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(20), unique=True, nullable=False)
     password = db.Column(db.String(80), nullable=False)
     name = db.Column(db.String(20), nullable=False)
+    predictions = db.relationship("Prediction", backref="user", lazy=True)
+
+
+class Game(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    team1 = db.Column(db.String(20), nullable=False)
+    score1 = db.Column(db.Integer, nullable=False)
+    team2 = db.Column(db.String(20), nullable=False)
+    score2 = db.Column(db.Integer, nullable=False)
+    predictions = db.relationship("Prediction", backref="game", lazy=True)
+
+
+class Prediction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    score1 = db.Column(db.Integer, nullable=False)
+    score2 = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    game_id = db.Column(db.Integer, db.ForeignKey("game.id"), nullable=False)
 
 
 with app.app_context():
@@ -47,7 +65,8 @@ login_manager.login_view = "login"
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.execute(db.select(User).filter_by(id=user_id)).first()[0]
+    user = db.session.execute(db.select(User).filter_by(id=user_id)).first()
+    return user[0] if user else None
 
 
 def apology(message, status, password1=None, password2=None):
