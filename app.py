@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_user, LoginManager, login_required, logout_user, current_user, UserMixin
 from flask_bcrypt import Bcrypt
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField
+from wtforms import StringField, SubmitField, PasswordField, IntegerField
 from wtforms.validators import DataRequired, Email
 
 app = Flask(__name__)
@@ -18,6 +18,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(20), unique=True, nullable=False)
     password = db.Column(db.String(80), nullable=False)
     name = db.Column(db.String(20), nullable=False)
+    points = db.Column(db.Integer, nullable=False, default=0)
     predictions = db.relationship("Prediction", backref="user", lazy=True)
 
 
@@ -27,6 +28,7 @@ class Game(db.Model):
     score1 = db.Column(db.Integer, nullable=False)
     team2 = db.Column(db.String(20), nullable=False)
     score2 = db.Column(db.Integer, nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
     predictions = db.relationship("Prediction", backref="game", lazy=True)
 
 
@@ -34,6 +36,7 @@ class Prediction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     score1 = db.Column(db.Integer, nullable=False)
     score2 = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     game_id = db.Column(db.Integer, db.ForeignKey("game.id"), nullable=False)
 
@@ -58,6 +61,12 @@ class RegisterForm(FlaskForm):
     submit = SubmitField("Register")
 
 
+class PredictionForm(FlaskForm):
+    score1 = IntegerField("Score 1", validators=[DataRequired()], render_kw={"placeholder": "Score 1"})
+    score2 = IntegerField("Score 2", validators=[DataRequired()], render_kw={"placeholder": "Score 2"})
+    submit = SubmitField("Submit score")
+
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -76,7 +85,12 @@ def apology(message, status, password1=None, password2=None):
 @app.route('/')
 @login_required
 def index():
-    return render_template("/index.html")
+    user_id = current_user.id
+    predictions = db.session.execute(
+        db.select(Prediction, Game).join(Game.predictions).where(Prediction.user_id == user_id).order_by(
+            Game.date.desc()).limit(10)).scalars()
+
+    return render_template("/index.html", predictions=predictions)
 
 
 @app.route("/login", methods=["GET", "POST"])

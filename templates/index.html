@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 
 {% block main %}
+    <h1 class="text-center text-5xl py-4">{{ current_user.name }}</h1>
+    <div class="text-center text-3xl py-2">Points: {{ current_user.points }}</div>
     <div class="grid grid-cols-2 gap-4">
         <div class="table w-full">
             <div class="table-header-group">
