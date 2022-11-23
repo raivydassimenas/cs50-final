@@ -5,10 +5,11 @@ from flask_bcrypt import Bcrypt
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField, IntegerField
 from wtforms.validators import DataRequired, Email
+import config
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///predictions.db'
-app.config["SECRET_KEY"] = 'mysecretkey'
+app.config["SQLALCHEMY_DATABASE_URI"] = config.SQLALCHEMY_DATABASE_URI
+app.config["SECRET_KEY"] = config.SECRET_KEY
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
