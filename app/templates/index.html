@@ -4,10 +4,28 @@
     <h1 class="text-center text-5xl py-4">{{ current_user.name }}</h1>
     <div class="text-center text-3xl py-2">Points: {{ current_user.points }}</div>
     <div class="grid grid-cols-2 gap-4">
-        <div class="table w-full">
-            <div class="table-header-group">
-
-            </div>
+        <div>
+            <h1 class="text-center text-xl font-bold">Predictions</h1>
+            <table class="table-auto mx-auto border-separate">
+                <thead>
+                <tr>
+                    <th class="border px-8 py-4">Team 1</th>
+                    <th class="border px-8 py-4">Actual score</th>
+                    <th class="border px-8 py-4">Predicted score</th>
+                    <th class="border px-8 py-4">Team 2</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for prediction in predictions %}
+                    <tr>
+                        <td class="border px-8 py-4">{{ prediction.team1 }}</td>
+                        <td class="border px-8 py-4">{{ prediction.score1 }} : {{ prediction.score2 }}</td>
+                        <td class="border px-8 py-4">{{ prediction.pscore1 }} : {{ prediction.pscore2 }}</td>
+                        <td class="border px-8 py-4">{{ prediction.team2 }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 {% endblock %}

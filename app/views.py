@@ -23,12 +23,13 @@ def apology(message, status, password1=None, password2=None):
 @app.route('/')
 @login_required
 def index():
+    prediction_form = PredictionForm()
     user_id = current_user.id
     predictions = db.session.execute(
         db.select(Prediction, Game).join(Game.predictions).where(Prediction.user_id == user_id).order_by(
             Game.date.desc()).limit(10)).scalars()
 
-    return render_template("/index.html", predictions=predictions)
+    return render_template("/index.html", predictions=predictions, prediction_form=prediction_form)
 
 
 @app.route("/login", methods=["GET", "POST"])

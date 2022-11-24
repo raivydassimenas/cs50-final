@@ -14,17 +14,17 @@ class User(db.Model, UserMixin):
 class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     team1 = db.Column(db.String(20), nullable=False)
-    score1 = db.Column(db.Integer, nullable=False)
+    score1 = db.Column(db.Integer, default=None)
     team2 = db.Column(db.String(20), nullable=False)
-    score2 = db.Column(db.Integer, nullable=False)
+    score2 = db.Column(db.Integer, default=None)
     date = db.Column(db.DateTime, nullable=False)
     predictions = db.relationship("Prediction", backref="game", lazy=True)
 
 
 class Prediction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    score1 = db.Column(db.Integer, nullable=False)
-    score2 = db.Column(db.Integer, nullable=False)
+    pscore1 = db.Column(db.Integer, default=None)
+    pscore2 = db.Column(db.Integer, default=None)
     created_at = db.Column(db.DateTime, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     game_id = db.Column(db.Integer, db.ForeignKey("game.id"), nullable=False)
