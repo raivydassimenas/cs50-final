@@ -29,7 +29,11 @@ def index():
         db.select(Prediction, Game).join(Game.predictions).where(Prediction.user_id == user_id).order_by(
             Game.date.desc()).limit(10)).scalars()
 
-    return render_template("/index.html", predictions=predictions, prediction_form=prediction_form)
+    form = PredictionForm()
+    next_prediction = {"team1": "Celtics", "team2": "Lakers"}
+
+    return render_template("/index.html", predictions=predictions, form=form,
+                           next_prediction=next_prediction)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -90,3 +94,9 @@ def logout():
     logout_user()
 
     return redirect(url_for("login"))
+
+
+@app.route("/prediction", methods=["GET", "POST"])
+@login_required
+def prediction():
+    return apology("Not implemented", 200)

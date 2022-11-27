@@ -2,7 +2,7 @@
 
 {% block main %}
     <form method="post" action="/login"
-          class="w-96 m-8 p-8 mx-auto gap-4 flex flex-col border-solid border-2 border-slate-500 rounded">
+          class="w-1/2 m-8 p-8 mx-auto gap-4 flex flex-col border-solid border-2 border-slate-500 rounded">
         {{ form.hidden_tag() }}
         {{ form.email(class="border-solid border-2 border-slate-500 mx-auto w-full p-1 rounded") }}
         {{ form.password(class="border-solid border-2 border-slate-500 mx-auto w-full p-1 rounded") }}
