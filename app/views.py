@@ -20,9 +20,9 @@ def apology(message, status, password1=None, password2=None):
     return render_template("/apology.html", message=message, password1=password1, password2=password2)
 
 
-@app.route('/')
+@app.route('/', endpoint='dashboard')
 @login_required
-def index():
+def dashboard():
     prediction_form = PredictionForm()
     user_id = current_user.id
     predictions = db.session.execute(
@@ -53,7 +53,7 @@ def login():
             return apology("Wrong email/password combination", 403)
 
         login_user(user)
-        return redirect(url_for("index"))
+        return redirect(url_for("dashboard"))
 
     return render_template("/login.html", form=form)
 
@@ -83,12 +83,12 @@ def register():
 
             login_user(user)
 
-            return redirect(url_for("index"))
+            return redirect(url_for("dashboard"))
 
     return render_template("/register.html", form=form)
 
 
-@app.route("/logout", methods=["GET", "POST"])
+@app.route("/logout", methods=["GET", "POST"], endpoint='logout')
 @login_required
 def logout():
     logout_user()
@@ -96,7 +96,9 @@ def logout():
     return redirect(url_for("login"))
 
 
-@app.route("/prediction", methods=["GET", "POST"])
+@app.route("/prediction", methods=["GET", "POST"], endpoint='prediction')
 @login_required
 def prediction():
-    return apology("Not implemented", 200)
+    if request.method == "POST":
+
+        return apology("Not implemented", 200)
