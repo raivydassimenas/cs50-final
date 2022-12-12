@@ -6,6 +6,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from app import app, login_manager, db, bcrypt
 from app.models import User, Prediction, Game
 from app.forms import RegisterForm, LoginForm, PredictionForm
+from app.helpers import finished_games, upcoming_games
 
 login_manager.login_view = 'login'
 
