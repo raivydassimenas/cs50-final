@@ -63,6 +63,8 @@ def update_db():
             db.session.commit()
         elif not game_db[0].finished:
             game_db.finished = True
+            game_db.score1 = game["score1"]
+            game_db.score2 = game["score2"]
             db.session.commit()
 
     for game in upcoming_games:
