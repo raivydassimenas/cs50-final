@@ -17,6 +17,7 @@ psycopg2 = "^2.9.5"
 flask-migrate = "^4.0.0"
 flask-script = "^2.0.6"
 requests = "^2.28.1"
+setuptools = "^65.6.3"
 
 
 [build-system]

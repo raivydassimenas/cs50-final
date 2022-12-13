@@ -18,6 +18,7 @@ class Game(db.Model):
     team2 = db.Column(db.String(20), nullable=False)
     score2 = db.Column(db.Integer, default=None)
     date = db.Column(db.DateTime, nullable=False)
+    finished = db.Column(db.Boolean, nullable=False, default=False)
     predictions = db.relationship("Prediction", backref="game", lazy=True)
 
 

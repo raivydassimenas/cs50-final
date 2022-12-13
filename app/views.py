@@ -6,7 +6,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from app import app, login_manager, db, bcrypt
 from app.models import User, Prediction, Game
 from app.forms import RegisterForm, LoginForm, PredictionForm
-from app.helpers import finished_games, upcoming_games
+from app.helpers import update_db
 
 login_manager.login_view = 'login'
 
@@ -33,7 +33,7 @@ def dashboard():
     form = PredictionForm()
     next_prediction = {"team1": "Celtics", "team2": "Lakers"}
 
-    return render_template("/index.html", predictions=predictions, form=form,
+    return render_template("/dashboard.html", predictions=predictions, form=form,
                            next_prediction=next_prediction)
 
 
@@ -52,6 +52,8 @@ def login():
         user = user[0]
         if not bcrypt.check_password_hash(user.password, password):
             return apology("Wrong email/password combination", 403)
+
+        update_db()
 
         login_user(user)
         return redirect(url_for("dashboard"))
@@ -81,6 +83,8 @@ def register():
             user = User(name=name, email=email, password=hashed_password)
             db.session.add(user)
             db.session.commit()
+
+            update_db()
 
             login_user(user)
 
