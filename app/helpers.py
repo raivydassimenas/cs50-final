@@ -1,5 +1,5 @@
 import requests
-from datetime import date
+from datetime import datetime, date
 from app import config, db
 from app.models import Game
 
@@ -24,10 +24,13 @@ def get_games():
     for game in response["response"]:
         team1 = game["teams"]["visitors"]["nickname"]
         team2 = game["teams"]["home"]["nickname"]
-        game_date = date.today()
         if game["status"]["short"] == 3:
             score1 = game["scores"]["visitors"]["points"]
             score2 = game["scores"]["home"]["points"]
+            if game["date"]["end"]:
+                game_date = datetime.fromisoformat(game["date"]["end"])
+            else:
+                game_date = datetime.now()
             game_obj = {
                 "team1": team1,
                 "team2": team2,
@@ -37,6 +40,7 @@ def get_games():
             }
             finished_games.append(game_obj)
         else:
+            game_date = datetime.now()
             game_obj = {
                 "team1": team1,
                 "team2": team2,
