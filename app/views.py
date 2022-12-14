@@ -24,16 +24,36 @@ def apology(message, status, password1=None, password2=None):
 @app.route('/', endpoint='dashboard')
 @login_required
 def dashboard():
-    prediction_form = PredictionForm()
     user_id = current_user.id
-    predictions = db.session.execute(
-        db.select(Prediction, Game).join(Game.predictions).where(Prediction.user_id == user_id).order_by(
+    predictions_made = db.session.execute(
+        db.select(Prediction, Game).join(Game.predictions).where(
+            Prediction.user_id == user_id
+            and Prediction.made
+        ).order_by(
             Game.date.desc()).limit(10)).scalars()
 
-    form = PredictionForm()
-    next_prediction = {"team1": "Celtics", "team2": "Lakers"}
+    predictions_to_make = db.session.execute(
+        db.select(Prediction, Game).join(Game.predictions).where(
+            Prediction.user_id == user_id
+            and not Game.finished
+            and not Prediction.made
+        )
+    ).first()
 
-    return render_template("/dashboard.html", predictions=predictions, form=form,
+    next_prediction = None
+
+    if predictions_to_make:
+        next_prediction = {
+            "game_id": predictions_to_make[0].game_id,
+            "user_id": predictions_to_make[0].user_id,
+            "team1": predictions_to_make[0].team1,
+            "team2": predictions_to_make[0].team2
+        }
+
+
+    form = PredictionForm()
+
+    return render_template("/dashboard.html", predictions=predictions_made, form=form,
                            next_prediction=next_prediction)
 
 

@@ -27,5 +27,7 @@ class Prediction(db.Model):
     pscore1 = db.Column(db.Integer, default=None)
     pscore2 = db.Column(db.Integer, default=None)
     created_at = db.Column(db.DateTime, nullable=False)
+    calculated_to_score = db.Column(db.Boolean, default=False)
+    made = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     game_id = db.Column(db.Integer, db.ForeignKey("game.id"), nullable=False)
