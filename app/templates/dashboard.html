@@ -35,8 +35,8 @@
                 <form method="post" action={{ url_for('prediction') }}
                       class="w-1/2 border-solid flex flex-col flex-start items-center border-2 border-slate-500 rounded gap-4 p-4">
                     {{ form.hidden_tag() }}
-                    {{ form.score1(class="border-solid border-2 border-slate-500 mx-auto w-1/2 p-2 rounded", placeholder=next_prediction["team1"]) }}
-                    {{ form.score2(class="border-solid border-2 border-slate-500 mx-auto w-1/2 p-2 rounded", placeholder=next_prediction["team2"]) }}<br>
+                    {{ form.pscore1(class="border-solid border-2 border-slate-500 mx-auto w-1/2 p-2 rounded", placeholder=next_prediction["team1"]) }}
+                    {{ form.pscore2(class="border-solid border-2 border-slate-500 mx-auto w-1/2 p-2 rounded", placeholder=next_prediction["team2"]) }}<br>
                     {{ form.submit(class="border-solid border-2 border-black mx-auto w-1/2 bg-slate-700 text-white p-2 rounded-full text-center") }}
                 </form>
             {% else %}

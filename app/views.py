@@ -2,6 +2,7 @@ import os
 
 from flask import render_template, request, url_for, redirect
 from flask_login import login_user, logout_user, current_user, login_required
+from datetime import datetime
 
 from app import app, login_manager, db, bcrypt
 from app.models import User, Prediction, Game
@@ -20,10 +21,12 @@ def load_user(user_id):
 def apology(message, status, password1=None, password2=None):
     return render_template("/apology.html", message=message, password1=password1, password2=password2)
 
+curr_pred_game_id = None
 
 @app.route('/', endpoint='dashboard')
 @login_required
 def dashboard():
+    curr_pred_game_id = None
     user_id = current_user.id
     games = db.session.execute(
         db.select(Game).order_by(
@@ -68,6 +71,7 @@ def dashboard():
                 "team1": game.team1,
                 "team2": game.team2
             }
+            curr_pred_game_id = game.id
             break
 
     form = PredictionForm()
@@ -143,4 +147,14 @@ def logout():
 @app.route("/prediction", methods=["GET", "POST"], endpoint='prediction')
 @login_required
 def prediction():
-    return apology("Not implemented", 200)
+    form = PredictionForm(request.form)
+    if request.method == "POST" and form.validate():
+        game = db.session.execute(
+            db.select(Game).where(Game.id == curr_pred_game_id)
+        ).first()
+        if game:
+            prediction_made = Prediction(
+                pscore1=form.pscore1.data, pscore2=form.pscore2.data, user_id=current_user.id, game_id=curr_pred_game_id, created_at=datetime.now(), made=True)
+            db.session.add(prediction_made)
+            db.session.commit()
+    return redirect(url_for("dashboard"))

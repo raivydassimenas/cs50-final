@@ -19,6 +19,6 @@ class RegisterForm(FlaskForm):
 
 
 class PredictionForm(FlaskForm):
-    score1 = IntegerField("Score 1", validators=[DataRequired()])
-    score2 = IntegerField("Score 2", validators=[DataRequired()])
+    pscore1 = IntegerField("Score 1", validators=[DataRequired()])
+    pscore2 = IntegerField("Score 2", validators=[DataRequired()])
     submit = SubmitField("Submit score")

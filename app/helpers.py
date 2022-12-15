@@ -74,9 +74,20 @@ def update_db():
     for game in upcoming_games:
         game_db = db.session.execute(
             db.select(Game).where(
-                Game.team1 == game["team1"] and Game.team2 == game["team2"] and Game.date.date() == game["date"].date())
+                Game.team1 == game["team1"] and Game.team2 == game["team2"] and Game.date.date() == game["date"].date() )
         ).first()
         if not game_db:
             game_to_insert = Game(team1=game["team1"], team2=game["team2"], date=game["date"])
             db.session.add(game_to_insert)
             db.session.commit()
+
+def calculate_points(score1, score2, pscore1, pscore2):
+    points = 0
+    if score1 > score2 and pscore1 > pscore2:
+        points += 20 + abs((score1 - score2) - (pscore1 - pscore2))
+        points = points if points > 0 else 0
+    elif score1 < score2 and pscore2 < pscore2:
+        points += 20 + abs((score2 - score1) - (pscore2 - pscore1))
+        points = points if points > 0 else 0
+    return points
+
