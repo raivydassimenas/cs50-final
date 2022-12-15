@@ -6,22 +6,24 @@
     <div class="grid grid-cols-2 gap-4">
         <div>
             <h1 class="text-center text-xl font-bold">Predictions</h1>
-            <table class="table-auto mx-auto border-separate">
-                <thead class="bg-slate-500 text-white">
-                <tr>
-                    <th class="border px-8 py-4">Team 1</th>
-                    <th class="border px-8 py-4">Actual score</th>
-                    <th class="border px-8 py-4">Predicted score</th>
-                    <th class="border px-8 py-4">Team 2</th>
+            <table class="table table-auto mx-auto border-separate">
+                <thead class="table-header-group bg-slate-500 text-white">
+                <tr class="table-row">
+                    <th class="table-cell border px-2 py-1 text-center">Team 1</th>
+                    <th class="table-cell border px-2 py-1 text-center">Actual score</th>
+                    <th class="table-cell border px-2 py-1 text-center">Predicted score</th>
+                    <th class="table-cell border px-2 py-1 text-center">Team 2</th>
+                    <th class="table-cell border px-2 py-1 text-center">Date</th>
                 </tr>
                 </thead>
-                <tbody>
-                {% for prediction in predictions %}
-                    <tr>
-                        <td class="border px-8 py-4">{{ prediction.team1 }}</td>
-                        <td class="border px-8 py-4">{{ prediction.score1 }} : {{ prediction.score2 }}</td>
-                        <td class="border px-8 py-4">{{ prediction.pscore1 }} : {{ prediction.pscore2 }}</td>
-                        <td class="border px-8 py-4">{{ prediction.team2 }}</td>
+                <tbody class="table-row-group">
+                {% for game_to_display in games_to_display %}
+                    <tr class="table-row">
+                        <td class="table-cell border px-2 py-1">{{ game_to_display["team1"] }}</td>
+                        <td class="table-cell border px-2 py-1">{{ game_to_display["score1"] }} : {{ game_to_display["score2"] }}</td>
+                        <td class="table-cell border px-2 py-1">{{ game_to_display["pscore1"] }} : {{ game_to_display["pscore2"] }}</td>
+                        <td class="table-cell border px-2 py-1">{{ game_to_display["team2"] }}</td>
+                        <td class="table-cell border px-2 py-1">{{ game_to_display["date"] }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -30,11 +32,11 @@
         <div class="flex flex-col flex-start items-center gap-4 p-8">
             <h1 class="text-center text-xl font-bold">Next prediction</h1>
             {% if next_prediction %}
-                <form method="post" action="/prediction"
+                <form method="post" action={{ url_for('prediction') }}
                       class="w-1/2 border-solid flex flex-col flex-start items-center border-2 border-slate-500 rounded gap-4 p-4">
                     {{ form.hidden_tag() }}
-                    {{ form.score1(class="border-solid border-2 border-slate-500 mx-auto w-1/2 p-2 rounded", placeholder=next_prediction.team1) }}
-                    {{ form.score2(class="border-solid border-2 border-slate-500 mx-auto w-1/2 p-2 rounded", placeholder=next_prediction.team2) }}<br>
+                    {{ form.score1(class="border-solid border-2 border-slate-500 mx-auto w-1/2 p-2 rounded", placeholder=next_prediction["team1"]) }}
+                    {{ form.score2(class="border-solid border-2 border-slate-500 mx-auto w-1/2 p-2 rounded", placeholder=next_prediction["team2"]) }}<br>
                     {{ form.submit(class="border-solid border-2 border-black mx-auto w-1/2 bg-slate-700 text-white p-2 rounded-full text-center") }}
                 </form>
             {% else %}

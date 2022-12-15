@@ -57,7 +57,7 @@ def update_db():
     for game in finished_games:
         game_db = db.session.execute(
             db.select(Game).where(
-                Game.team1 == game["team1"] and Game.team2 == game["team2"] and Game.date == game["date"])
+                Game.team1 == game["team1"] and Game.team2 == game["team2"] and Game.date.date() == game["date"].date())
         ).first()
         if not game_db:
             game_to_insert = Game(team1=game["team1"], score1=game["score1"], team2=game["team2"],
@@ -74,7 +74,7 @@ def update_db():
     for game in upcoming_games:
         game_db = db.session.execute(
             db.select(Game).where(
-                Game.team1 == game["team1"] and Game.team2 == game["team2"] and Game.date == game["date"])
+                Game.team1 == game["team1"] and Game.team2 == game["team2"] and Game.date.date() == game["date"].date())
         ).first()
         if not game_db:
             game_to_insert = Game(team1=game["team1"], team2=game["team2"], date=game["date"])

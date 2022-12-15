@@ -25,35 +25,54 @@ def apology(message, status, password1=None, password2=None):
 @login_required
 def dashboard():
     user_id = current_user.id
-    predictions_made = db.session.execute(
-        db.select(Prediction, Game).join(Game.predictions).where(
-            Prediction.user_id == user_id
-            and Prediction.made
-        ).order_by(
+    games = db.session.execute(
+        db.select(Game).order_by(
             Game.date.desc()).limit(10)).scalars()
 
-    predictions_to_make = db.session.execute(
-        db.select(Prediction, Game).join(Game.predictions).where(
-            Prediction.user_id == user_id
-            and not Game.finished
-            and not Prediction.made
+    games_to_display = []
+
+    for game in games:
+        game_to_display = {
+            "team1": game.team1,
+            "team2": game.team2,
+            "score1": game.score1,
+            "score2": game.score2,
+            "date": str(game.date)[:10]
+        }
+        pred = db.session.execute(db.select(Prediction)
+                                  .where(Prediction.game_id == game.id
+                                         and Prediction.user_id == user_id)).first()
+        game_to_display["pscore1"] = pred.pscore1 if pred else None
+        game_to_display["pscore2"] = pred.pscore2 if pred else None
+        games_to_display.append(game_to_display)
+
+    unfinished_games = db.session.execute(
+        db.select(Game).where(
+            not Game.finished
         )
-    ).first()
+    ).scalars()
+
+    unmade_predictions = db.session.execute(
+        db.select(Prediction.game_id).where(
+            not Prediction.made
+        )
+    ).scalars()
 
     next_prediction = None
 
-    if predictions_to_make:
-        next_prediction = {
-            "game_id": predictions_to_make[0].game_id,
-            "user_id": predictions_to_make[0].user_id,
-            "team1": predictions_to_make[0].team1,
-            "team2": predictions_to_make[0].team2
-        }
-
+    for game in unfinished_games:
+        if game.id in unmade_predictions:
+            next_prediction = {
+                "game_id": game.id,
+                "user_id": user_id,
+                "team1": game.team1,
+                "team2": game.team2
+            }
+            break
 
     form = PredictionForm()
 
-    return render_template("/dashboard.html", predictions=predictions_made, form=form,
+    return render_template("/dashboard.html", games_to_display=games_to_display, form=form,
                            next_prediction=next_prediction)
 
 
@@ -124,6 +143,4 @@ def logout():
 @app.route("/prediction", methods=["GET", "POST"], endpoint='prediction')
 @login_required
 def prediction():
-    if request.method == "POST":
-
-        return apology("Not implemented", 200)
+    return apology("Not implemented", 200)
