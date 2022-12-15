@@ -68,7 +68,7 @@ def update_db():
         elif not game_db[0].finished:
             db.session.execute(db.update(Game).where(
                 Game.id == game["id"]
-            ).values(finished=True, score1=game["score1"], score2=game["score2"]))
+            ).values(finished=True, score1=game["score1"], score2=game["score2"], date=game["date"]))
 
     for game in upcoming_games:
         game_db = db.session.execute(
