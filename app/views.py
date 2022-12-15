@@ -7,7 +7,7 @@ from datetime import datetime
 from app import app, login_manager, db, bcrypt
 from app.models import User, Prediction, Game
 from app.forms import RegisterForm, LoginForm, PredictionForm
-from app.helpers import update_db
+from app.helpers import update_db, calculate_points
 
 login_manager.login_view = 'login'
 
@@ -28,6 +28,7 @@ curr_pred_game_id = None
 def dashboard():
     curr_pred_game_id = None
     user_id = current_user.id
+    calculate_points(user_id)
     games = db.session.execute(
         db.select(Game).order_by(
             Game.date.desc()).limit(10)).scalars()
