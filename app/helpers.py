@@ -1,11 +1,9 @@
 import requests
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from app import config, db
 from app.models import Game, Prediction, User
 
 url = "https://api-nba-v1.p.rapidapi.com/games"
-
-querystring = {"date": str(date.today())}
 
 headers = {
     "X-RapidAPI-Key": config.API_NBA_KEY,
@@ -13,7 +11,7 @@ headers = {
 }
 
 
-def get_games():
+def get_games(querystring):
     response = requests.request("GET", url, headers=headers, params=querystring)
 
     response = response.json()
@@ -30,7 +28,7 @@ def get_games():
             if game["date"]["end"]:
                 game_date = datetime.fromisoformat(game["date"]["end"])
             else:
-                game_date = datetime.now()
+                game_date = querystring["date"]
             game_obj = {
                 "team1": team1,
                 "team2": team2,
@@ -40,7 +38,7 @@ def get_games():
             }
             finished_games.append(game_obj)
         else:
-            game_date = datetime.now()
+            game_date = querystring["date"]
             game_obj = {
                 "team1": team1,
                 "team2": team2,
@@ -52,7 +50,9 @@ def get_games():
 
 
 def update_db():
-    finished_games, upcoming_games = get_games()
+    finished_games, upcoming_games = get_games(querystring = {"date": str(date.today())})
+    finished_games1, upcoming_games1 = get_games({"date": str(date.today() + timedelta(days=1))})
+    upcoming_games.extend(upcoming_games1)
 
     for game in finished_games:
         game_db = db.session.execute(

@@ -21,12 +21,10 @@ def load_user(user_id):
 def apology(message, status, password1=None, password2=None):
     return render_template("/apology.html", message=message, password1=password1, password2=password2)
 
-curr_pred_game_id = None
 
 @app.route('/', endpoint='dashboard')
 @login_required
 def dashboard():
-    curr_pred_game_id = None
     user_id = current_user.id
     calculate_points(user_id)
     games = db.session.execute(
@@ -52,20 +50,21 @@ def dashboard():
 
     unfinished_games = db.session.execute(
         db.select(Game).where(
-            not Game.finished
+            Game.finished == False
         )
     ).scalars()
 
-    unmade_predictions = db.session.execute(
+    made_predictions = db.session.execute(
         db.select(Prediction.game_id).where(
-            not Prediction.made
+            Prediction.made == True
+            and Prediction.user_id == user_id
         )
     ).scalars()
 
     next_prediction = None
 
     for game in unfinished_games:
-        if game.id in unmade_predictions:
+        if not made_predictions or game.id not in made_predictions:
             next_prediction = {
                 "game_id": game.id,
                 "user_id": user_id,
@@ -78,7 +77,7 @@ def dashboard():
     form = PredictionForm()
 
     return render_template("/dashboard.html", games_to_display=games_to_display, form=form,
-                           next_prediction=next_prediction)
+                           next_prediction=next_prediction, curr_pred_game_id=curr_pred_game_id)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -145,17 +144,17 @@ def logout():
     return redirect(url_for("login"))
 
 
-@app.route("/prediction", methods=["GET", "POST"], endpoint='prediction')
+@app.route("/prediction/<int:game_id>", methods=["GET", "POST"], endpoint='prediction')
 @login_required
-def prediction():
+def prediction(game_id):
     form = PredictionForm(request.form)
     if request.method == "POST" and form.validate():
         game = db.session.execute(
-            db.select(Game).where(Game.id == curr_pred_game_id)
+            db.select(Game).where(Game.id == game_id)
         ).first()
         if game:
             prediction_made = Prediction(
-                pscore1=form.pscore1.data, pscore2=form.pscore2.data, user_id=current_user.id, game_id=curr_pred_game_id, created_at=datetime.now(), made=True)
+                pscore1=form.pscore1.data, pscore2=form.pscore2.data, user_id=current_user.id, game_id=game_id, created_at=datetime.now(), made=True)
             db.session.add(prediction_made)
             db.session.commit()
     return redirect(url_for("dashboard"))
