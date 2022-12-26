@@ -27,16 +27,24 @@ def apology(message, status, password1=None, password2=None):
 def dashboard():
     user_id = current_user.id
     calculate_points(user_id)
-    games = db.session.execute(
-        db.select(Game, Prediction).where(Game.id == Prediction.game_id and Prediction.user_id == user_id and Prediction.made == True).order_by(
+    predictions = db.session.execute(
+        db.select(Prediction).join(Game).where(
+            Prediction.user_id == user_id
+            and Prediction.made == True).order_by(
             Game.date.desc()).limit(10)).scalars()
 
     games_to_display = []
 
-    for game in games:
+    for prediction1 in predictions:
+        game = db.session.execute(
+            db.select(Game).join(Prediction).where(
+                Game.id == prediction1.game_id
+            )
+        ).first()
+        game = game[0]
         game_to_display = {"team1": game.team1, "team2": game.team2, "score1": game.score1, "score2": game.score2,
-                           "date": str(game.date)[:10], "pscore1": game.pscore1,
-                           "pscore2": game.pscore2}
+                           "date": str(game.date)[:10], "pscore1": prediction1.pscore1,
+                           "pscore2": prediction1.pscore2}
         games_to_display.append(game_to_display)
 
     unfinished_games = db.session.execute(
@@ -146,7 +154,8 @@ def prediction(game_id):
         ).first()
         if game:
             prediction_made = Prediction(
-                pscore1=form.pscore1.data, pscore2=form.pscore2.data, user_id=current_user.id, game_id=game_id, created_at=datetime.now(), made=True)
+                pscore1=form.pscore1.data, pscore2=form.pscore2.data, user_id=current_user.id, game_id=game_id,
+                created_at=datetime.now(), made=True)
             db.session.add(prediction_made)
             db.session.commit()
     return redirect(url_for("dashboard"))

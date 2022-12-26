@@ -55,9 +55,9 @@ def update_db():
     last_access_date = db.session.execute(
         db.select(Access).order_by(Access.access_date.desc())
     ).first()
-    curr_access_date = last_access_date[0].access_date.date()
+    curr_access_date = last_access_date[0].access_date.date() - timedelta(days=1)
 
-    while curr_access_date < date.today() + timedelta(days=1):
+    while curr_access_date <= date.today() + timedelta(days=1):
         finished_games_diff, upcoming_games_diff = get_games(querystring={"date": str(curr_access_date)})
         finished_games.extend(finished_games_diff)
         upcoming_games.extend(upcoming_games_diff)
@@ -105,14 +105,22 @@ def calculate_points_per_game(score1, score2, pscore1, pscore2):
 def calculate_points(user_id):
     points_to_add = 0
     predictions_to_calculate = db.session.execute(
-        db.select(Game, Prediction).join(Game.predictions).where(
-            not Prediction.calculated_to_score
-            and Game.finished
+        db.select(Prediction).join(Game)
+        .where(Game.finished == True)
+        .where(
+            Prediction.calculated_to_score == False
             and Prediction.user_id == user_id
+            and Prediction.made == True
         )
     ).scalars()
     for prediction_to_calculate in predictions_to_calculate:
-        score1, score2, pscore1, pscore2 = prediction_to_calculate.score1, prediction_to_calculate.score2, prediction_to_calculate.pscore1, prediction_to_calculate.pscore2
+        game_to_calculate = db.session.execute(
+            db.select(Game).join(Prediction).where(
+                Game.id == prediction_to_calculate.game_id
+            )
+        ).first()[0]
+        print(prediction_to_calculate.game_id)
+        score1, score2, pscore1, pscore2 = game_to_calculate.score1, game_to_calculate.score2, prediction_to_calculate.pscore1, prediction_to_calculate.pscore2
         points_to_add += calculate_points_per_game(score1, score2, pscore1, pscore2)
         db.session.execute(db.update(Prediction).where(
             Prediction.user_id == user_id
