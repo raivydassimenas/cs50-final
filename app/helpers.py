@@ -1,7 +1,7 @@
 import requests
 from datetime import datetime, date, timedelta
 from app import config, db
-from app.models import Game, Prediction, User
+from app.models import Game, Prediction, User, Access
 
 url = "https://api-nba-v1.p.rapidapi.com/games"
 
@@ -50,12 +50,19 @@ def get_games(querystring):
 
 
 def update_db():
+    finished_games, upcoming_games = [], []
+
     last_access_date = db.session.execute(
-        db.select(Access)
-    )
-    finished_games, upcoming_games = get_games(querystring = {"date": str(date.today())})
-    finished_games1, upcoming_games1 = get_games({"date": str(date.today() + timedelta(days=1))})
-    upcoming_games.extend(upcoming_games1)
+        db.select(Access).order_by(Access.access_date.desc())
+    ).first()
+    curr_access_date = last_access_date[0].access_date.date()
+
+    while curr_access_date < date.today() + timedelta(days=1):
+        finished_games_diff, upcoming_games_diff = get_games(querystring={"date": str(curr_access_date)})
+        finished_games.extend(finished_games_diff)
+        upcoming_games.extend(upcoming_games_diff)
+
+        curr_access_date += timedelta(days=1)
 
     for game in finished_games:
         game_db = db.session.execute(
@@ -76,12 +83,13 @@ def update_db():
     for game in upcoming_games:
         game_db = db.session.execute(
             db.select(Game).where(
-                Game.team1 == game["team1"] and Game.team2 == game["team2"] and Game.date.date() == game["date"].date() )
+                Game.team1 == game["team1"] and Game.team2 == game["team2"] and Game.date.date() == game["date"].date())
         ).first()
         if not game_db:
             game_to_insert = Game(team1=game["team1"], team2=game["team2"], date=game["date"])
             db.session.add(game_to_insert)
             db.session.commit()
+
 
 def calculate_points_per_game(score1, score2, pscore1, pscore2):
     points = 0
@@ -92,6 +100,7 @@ def calculate_points_per_game(score1, score2, pscore1, pscore2):
         points += 20 + abs((score2 - score1) - (pscore2 - pscore1))
         points = points if points > 0 else 0
     return points
+
 
 def calculate_points(user_id):
     points_to_add = 0

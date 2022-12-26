@@ -28,24 +28,15 @@ def dashboard():
     user_id = current_user.id
     calculate_points(user_id)
     games = db.session.execute(
-        db.select(Game).order_by(
+        db.select(Game, Prediction).where(Game.id == Prediction.game_id and Prediction.user_id == user_id and Prediction.made == True).order_by(
             Game.date.desc()).limit(10)).scalars()
 
     games_to_display = []
 
     for game in games:
-        game_to_display = {
-            "team1": game.team1,
-            "team2": game.team2,
-            "score1": game.score1,
-            "score2": game.score2,
-            "date": str(game.date)[:10]
-        }
-        pred = db.session.execute(db.select(Prediction)
-                                  .where(Prediction.game_id == game.id
-                                         and Prediction.user_id == user_id)).first()
-        game_to_display["pscore1"] = pred.pscore1 if pred else None
-        game_to_display["pscore2"] = pred.pscore2 if pred else None
+        game_to_display = {"team1": game.team1, "team2": game.team2, "score1": game.score1, "score2": game.score2,
+                           "date": str(game.date)[:10], "pscore1": game.pscore1,
+                           "pscore2": game.pscore2}
         games_to_display.append(game_to_display)
 
     unfinished_games = db.session.execute(
@@ -62,6 +53,7 @@ def dashboard():
     ).scalars()
 
     next_prediction = None
+    curr_pred_game_id = None
 
     for game in unfinished_games:
         if not made_predictions or game.id not in made_predictions:
