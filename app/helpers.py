@@ -50,6 +50,9 @@ def get_games(querystring):
 
 
 def update_db():
+    last_access_date = db.session.execute(
+        db.select(Access)
+    )
     finished_games, upcoming_games = get_games(querystring = {"date": str(date.today())})
     finished_games1, upcoming_games1 = get_games({"date": str(date.today() + timedelta(days=1))})
     upcoming_games.extend(upcoming_games1)

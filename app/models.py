@@ -31,3 +31,7 @@ class Prediction(db.Model):
     made = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     game_id = db.Column(db.Integer, db.ForeignKey("game.id"), nullable=False)
+
+class Access(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    access_date = db.Column(db.DateTime, nullable=False)
