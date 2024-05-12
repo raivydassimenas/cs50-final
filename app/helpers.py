@@ -28,7 +28,7 @@ def get_games(querystring):
             if game["date"]["end"]:
                 game_date = datetime.fromisoformat(game["date"]["end"])
             else:
-                game_date = querystring["date"]
+                game_date = datetime.fromisoformat(querystring["date"])
             game_obj = {
                 "team1": team1,
                 "team2": team2,
@@ -38,7 +38,7 @@ def get_games(querystring):
             }
             finished_games.append(game_obj)
         else:
-            game_date = querystring["date"]
+            game_date = datetime.fromisoformat(querystring["date"])
             game_obj = {
                 "team1": team1,
                 "team2": team2,
@@ -55,7 +55,7 @@ def update_db():
     last_access_date = db.session.execute(
         db.select(Access).order_by(Access.access_date.desc())
     ).first()
-    curr_access_date = last_access_date[0].access_date.date() - timedelta(days=1)
+    curr_access_date = last_access_date[0].access_date.date() - timedelta(days=1) if last_access_date else date.today() - timedelta(days=1)
 
     while curr_access_date <= date.today() + timedelta(days=1):
         finished_games_diff, upcoming_games_diff = get_games(querystring={"date": str(curr_access_date)})
